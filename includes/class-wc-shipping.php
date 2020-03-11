@@ -246,6 +246,8 @@ class WC_Shipping {
 				$class->max_width = empty( $class_max_width ) ? '—' : $class_max_width;
 				$class_max_height = get_term_meta( $class->term_id, 'max_height', true );
 				$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
+				$class_has_single_dimension = get_term_meta( $class->term_id, 'has_single_dimension', true );
+				$class->has_single_dimension = empty( $class_has_single_dimension ) ? false : true;
 			}
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}

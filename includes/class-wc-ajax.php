@@ -2910,6 +2910,7 @@ class WC_AJAX {
 				delete_term_meta( $term_id, 'max_length' );
 				delete_term_meta( $term_id, 'max_width' );
 				delete_term_meta( $term_id, 'max_height' );
+				delete_term_meta( $term_id, 'has_single_dimension' );
 				wp_delete_term( $term_id, 'product_shipping_class' );
 				continue;
 			}
@@ -2944,6 +2945,10 @@ class WC_AJAX {
 				$update_args['max_height'] = wc_clean( $data['max_height'] );
 			}
 
+			if ( isset( $data['has_single_dimension'] ) ) {
+				$update_args['has_single_dimension'] = wc_clean( $data['has_single_dimension'] );
+			}
+
 			if ( isset( $data['newRow'] ) ) {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
@@ -2955,6 +2960,7 @@ class WC_AJAX {
 				add_term_meta( $term_id, 'max_length', $update_args['max_length'] );
 				add_term_meta( $term_id, 'max_width', $update_args['max_width'] );
 				add_term_meta( $term_id, 'max_height', $update_args['max_height'] );
+				add_term_meta( $term_id, 'has_single_dimension', $update_args['has_single_dimension'] );
 			} else {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 				if ( isset( $update_args['max_weight'] ) ) {
@@ -2971,6 +2977,10 @@ class WC_AJAX {
 
 				if ( isset( $update_args['max_height'] ) ) {
 					update_term_meta( $term_id, 'max_height', $update_args['max_height'] );
+				}
+
+				if ( isset( $update_args['has_single_dimension'] ) ) {
+					update_term_meta( $term_id, 'has_single_dimension', $update_args['has_single_dimension'] );
 				}
 			}
 

@@ -82,8 +82,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					break;
 				case 'wc-shipping-class-max-dimensions':
 					?>
-					<div class="view">{{ data.max_length }}x{{ data.max_width }}x{{ data.max_height }} <?php echo esc_html( $dimension_unit ); ?></div>
-					<div class="edit"><input class="dimensions_input" type="number" name="max_length[{{ data.term_id }}]" data-attribute="max_length" value="{{ data.max_length }}" placeholder="<?php esc_attr_e( 'Max length', 'woocommerce' ); ?>" /> x <input class="dimensions_input" type="number" name="max_width[{{ data.term_id }}]" data-attribute="max_width" value="{{ data.max_width }}" placeholder="<?php esc_attr_e( 'Max width', 'woocommerce' ); ?>" /> x <input class="dimensions_input" type="number" name="max_height[{{ data.term_id }}]" data-attribute="max_height" value="{{ data.max_height }}" placeholder="<?php esc_attr_e( 'Max height', 'woocommerce' ); ?>" /></div>
+					<div class="view">{{ data.max_length }}{{ !data.has_single_dimension ? 'x' + data.max_width : '' }}{{ !data.has_single_dimension ? 'x' + data.max_height : '' }} <?php echo esc_html( $dimension_unit ); ?></div>
+					<div class="edit">
+						<input class="dimensions-input {{ data.has_single_dimension ? 'single-dimension' : '' }}" type="number" name="max_length[{{ data.term_id }}]" data-attribute="max_length" value="{{ data.max_length }}" placeholder="<?php esc_attr_e( 'Max length', 'woocommerce' ); ?>" /><div class="has-multi-dimensions" style="{{ data.has_single_dimension ? 'display: none;' : '' }}"> x <input class="dimensions-input" type="number" name="max_width[{{ data.term_id }}]" data-attribute="max_width" value="{{ data.max_width }}" placeholder="<?php esc_attr_e( 'Max width', 'woocommerce' ); ?>" /> x <input class="dimensions-input" type="number" name="max_height[{{ data.term_id }}]" data-attribute="max_height" value="{{ data.max_height }}" placeholder="<?php esc_attr_e( 'Max height', 'woocommerce' ); ?>" /></div>
+						<div class="row-actions">
+							<p><input class="has-single-dimension" type="checkbox" name="has_single_dimension[{{ data.term_id }}]" data-attribute="has_single_dimension" value="{{ data.has_single_dimension }}" {{ data.has_single_dimension ? 'checked' : '' }} /><?php esc_html_e( 'Single dimension', 'woocommerce' ); ?></p>
+						</div>
+					</div>
 					<?php
 					break;
 				case 'wc-shipping-class-count':

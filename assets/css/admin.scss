@@ -7265,7 +7265,17 @@ table.bar_chart {
 	}
 }
 
+.wc-shipping-class-max-dimensions {
 
-.dimensions_input {
-	width: 30%;
+	.dimensions-input {
+		width: 30%;
+
+		&.single-dimension {
+			width: unset;
+		}
+	}
+
+	.has-multi-dimensions {
+		display: inline;
+	}
 }

@@ -220,7 +220,8 @@
 						$target   = $( event.target ),
 						term_id   = $target.closest( 'tr' ).data( 'id' ),
 						attribute = $target.data( 'attribute' ),
-						value     = $target.val(),
+						checkbox  = $target.is( ':checkbox' ),
+						value     = checkbox ? ( $target.is( ':checked' ) ? 'true' : '' ) : $target.val(),
 						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
 						changes = {};
 
@@ -241,5 +242,18 @@
 			} );
 
 		shippingClassView.render();
+	});
+
+	$( document ).on( 'change', '.has-single-dimension', function() {
+		var lengthDimension = $( this ).closest( '.edit' ).find( '.dimensions-input[data-attribute="max_length"]').first();
+		var multiDimensions = $( this ).closest( '.edit' ).find( '.has-multi-dimensions' ).first();
+
+		if ( this.checked ) {
+			lengthDimension.addClass( 'single-dimension' );
+			multiDimensions.hide();
+		} else {
+			lengthDimension.removeClass( 'single-dimension' );
+			multiDimensions.show();
+		}
 	});
 })( jQuery, shippingClassesLocalizeScript, wp, ajaxurl );
