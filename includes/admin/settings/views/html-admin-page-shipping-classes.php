@@ -74,6 +74,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="edit"><input type="text" name="description[{{ data.term_id }}]" data-attribute="description" value="{{ data.description }}" placeholder="<?php esc_attr_e( 'Description for your reference', 'woocommerce' ); ?>" /></div>
 					<?php
 					break;
+				case 'wc-shipping-class-max-weight':
+					?>
+					<div class="view">{{ data.max_weight }} <?php echo esc_html( $weight_unit ); ?></div>
+					<div class="edit"><input type="number" name="max_weight[{{ data.term_id }}]" data-attribute="max_weight" value="{{ data.max_weight }}" placeholder="<?php esc_attr_e( 'Max weight', 'woocommerce' ); ?>" /></div>
+					<?php
+					break;
+				case 'wc-shipping-class-max-dimensions':
+					?>
+					<div class="view">{{ data.max_length }}x{{ data.max_width }}x{{ data.max_height }} <?php echo esc_html( $dimension_unit ); ?></div>
+					<div class="edit"><input class="dimensions_input" type="number" name="max_length[{{ data.term_id }}]" data-attribute="max_length" value="{{ data.max_length }}" placeholder="<?php esc_attr_e( 'Max length', 'woocommerce' ); ?>" /> x <input class="dimensions_input" type="number" name="max_width[{{ data.term_id }}]" data-attribute="max_width" value="{{ data.max_width }}" placeholder="<?php esc_attr_e( 'Max width', 'woocommerce' ); ?>" /> x <input class="dimensions_input" type="number" name="max_height[{{ data.term_id }}]" data-attribute="max_height" value="{{ data.max_height }}" placeholder="<?php esc_attr_e( 'Max height', 'woocommerce' ); ?>" /></div>
+					<?php
+					break;
 				case 'wc-shipping-class-count':
 					?>
 					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&product_shipping_class=' ) ); ?>{{data.slug}}">{{ data.count }}</a>

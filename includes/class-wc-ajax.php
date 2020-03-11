@@ -2906,6 +2906,10 @@ class WC_AJAX {
 					// That's fine, it's not in the database anyways. NEXT!
 					continue;
 				}
+				delete_term_meta( $term_id, 'max_weight' );
+				delete_term_meta( $term_id, 'max_length' );
+				delete_term_meta( $term_id, 'max_width' );
+				delete_term_meta( $term_id, 'max_height' );
 				wp_delete_term( $term_id, 'product_shipping_class' );
 				continue;
 			}
@@ -2924,6 +2928,22 @@ class WC_AJAX {
 				$update_args['description'] = wc_clean( $data['description'] );
 			}
 
+			if ( isset( $data['max_weight'] ) ) {
+				$update_args['max_weight'] = wc_clean( $data['max_weight'] );
+			}
+
+			if ( isset( $data['max_length'] ) ) {
+				$update_args['max_length'] = wc_clean( $data['max_length'] );
+			}
+
+			if ( isset( $data['max_width'] ) ) {
+				$update_args['max_width'] = wc_clean( $data['max_width'] );
+			}
+
+			if ( isset( $data['max_height'] ) ) {
+				$update_args['max_height'] = wc_clean( $data['max_height'] );
+			}
+
 			if ( isset( $data['newRow'] ) ) {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
@@ -2931,8 +2951,27 @@ class WC_AJAX {
 				}
 				$inserted_term = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
+				add_term_meta( $term_id, 'max_weight', $update_args['max_weight'] );
+				add_term_meta( $term_id, 'max_length', $update_args['max_length'] );
+				add_term_meta( $term_id, 'max_width', $update_args['max_width'] );
+				add_term_meta( $term_id, 'max_height', $update_args['max_height'] );
 			} else {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
+				if ( isset( $update_args['max_weight'] ) ) {
+					update_term_meta( $term_id, 'max_weight', $update_args['max_weight'] );
+				}
+
+				if ( isset( $update_args['max_length'] ) ) {
+					update_term_meta( $term_id, 'max_length', $update_args['max_length'] );
+				}
+
+				if ( isset( $update_args['max_width'] ) ) {
+					update_term_meta( $term_id, 'max_width', $update_args['max_width'] );
+				}
+
+				if ( isset( $update_args['max_height'] ) ) {
+					update_term_meta( $term_id, 'max_height', $update_args['max_height'] );
+				}
 			}
 
 			do_action( 'woocommerce_shipping_classes_save_class', $term_id, $data );

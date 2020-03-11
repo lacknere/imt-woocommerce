@@ -237,6 +237,16 @@ class WC_Shipping {
 					'orderby'    => 'name',
 				)
 			);
+			foreach ( $classes as $class ) {
+				$class_max_weight = get_term_meta( $class->term_id, 'max_weight', true );
+				$class->max_weight = empty( $class_max_weight ) ? '—' : $class_max_weight;
+				$class_max_length = get_term_meta( $class->term_id, 'max_length', true );
+				$class->max_length = empty( $class_max_length ) ? '—' : $class_max_length;
+				$class_max_width = get_term_meta( $class->term_id, 'max_width', true );
+				$class->max_width = empty( $class_max_width ) ? '—' : $class_max_width;
+				$class_max_height = get_term_meta( $class->term_id, 'max_height', true );
+				$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
+			}
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
 		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );

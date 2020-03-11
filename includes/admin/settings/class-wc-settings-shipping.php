@@ -372,12 +372,17 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$shipping_class_columns = apply_filters(
 			'woocommerce_shipping_classes_columns',
 			array(
-				'wc-shipping-class-name'        => __( 'Shipping class', 'woocommerce' ),
-				'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
-				'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),
-				'wc-shipping-class-count'       => __( 'Product count', 'woocommerce' ),
+				'wc-shipping-class-name'           => __( 'Shipping class', 'woocommerce' ),
+				'wc-shipping-class-slug'           => __( 'Slug', 'woocommerce' ),
+				'wc-shipping-class-description'    => __( 'Description', 'woocommerce' ),
+				'wc-shipping-class-max-weight'     => __( 'Max weight', 'woocommerce' ),
+				'wc-shipping-class-max-dimensions' => __( 'Max dimensions', 'woocommerce' ),
+				'wc-shipping-class-count'          => __( 'Product count', 'woocommerce' ),
 			)
 		);
+
+		$weight_unit = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php';
 	}
