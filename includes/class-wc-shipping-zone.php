@@ -150,6 +150,24 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	}
 
 	/**
+	 * Get zone shipping classes.
+	 *
+	 * @return array of zone shipping classes
+	 */
+	public function get_zone_shipping_classes() {
+		$shipping_classes = WC()->shipping()->get_shipping_classes();
+		$zone_shipping_class_ids_meta = $this->get_meta( 'zone_shipping_classes' );
+		$zone_shipping_class_ids = is_array( $zone_shipping_class_ids_meta ) ? $zone_shipping_class_ids_meta : array();
+		$zone_shipping_classes = array_filter(
+			$shipping_classes,
+			function( $shipping_class ) use ( $zone_shipping_class_ids ) {
+				return in_array( $shipping_class->term_id, $zone_shipping_class_ids );
+			}
+		);
+		return $zone_shipping_classes;
+	}
+
+	/**
 	 * Get shipping methods linked to this zone.
 	 *
 	 * @param bool   $enabled_only Only return enabled methods.
@@ -242,6 +260,16 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		if ( 0 !== $this->get_id() ) {
 			$this->set_prop( 'zone_locations', $locations );
 		}
+	}
+
+	/**
+	 * Set zone shipping classes.
+	 *
+	 * @since 4.0.0
+	 * @param array $shipping_classes Value to set.
+	 */
+	public function set_zone_shipping_classes( $shipping_classes ) {
+		$this->update_meta_data( 'zone_shipping_classes', $shipping_classes );
 	}
 
 	/**

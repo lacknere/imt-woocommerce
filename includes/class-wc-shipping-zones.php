@@ -54,7 +54,7 @@ class WC_Shipping_Zones {
 	 * Get shipping zone by an ID.
 	 *
 	 * @since 2.6.0
-	 * @param string $by Get by 'zone_id' or 'instance_id'.
+	 * @param string $by Get by 'zone_id', 'instance_id' or 'current'.
 	 * @param int    $id ID.
 	 * @return WC_Shipping_Zone|bool
 	 */
@@ -69,6 +69,8 @@ class WC_Shipping_Zones {
 				$data_store = WC_Data_Store::load( 'shipping-zone' );
 				$zone_id    = $data_store->get_zone_id_by_instance_id( $id );
 				break;
+			case 'current':
+				$zone_id = array_key_exists( 'zone_id', $_REQUEST ) ? wc_clean( wp_unslash( $_REQUEST['zone_id'] ) ) : false;
 		}
 
 		if ( false !== $zone_id ) {

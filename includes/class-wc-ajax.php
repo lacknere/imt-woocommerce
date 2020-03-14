@@ -2793,6 +2793,11 @@ class WC_AJAX {
 			}
 		}
 
+		if ( isset( $changes['zone_shipping_classes'] ) ) {
+			$shipping_classes = array_map( 'wc_clean', $changes['zone_shipping_classes'] );
+			$zone->set_zone_shipping_classes( $shipping_classes );
+		}
+
 		if ( isset( $changes['methods'] ) ) {
 			foreach ( $changes['methods'] as $instance_id => $data ) {
 				$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );

@@ -38,7 +38,15 @@ $settings = array(
 	),
 );
 
-$shipping_classes = WC()->shipping()->get_shipping_classes();
+$shipping_zone = WC_Shipping_Zones::get_zone_by( 'current' );
+if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['wc_shipping_zones_nonce'] ) && isset( $_POST['instance_id'] ) ) {
+	$shipping_zone_nonce = wc_clean( wp_unslash( $_POST['wc_shipping_zones_nonce'] ) );
+	$shipping_zone_instance_id = wc_clean( wp_unslash( $_POST['instance_id'] ) );
+	if ( wp_verify_nonce( $shipping_zone_nonce ) ) {
+		$shipping_zone = WC_Shipping_Zones::get_zone_by( 'instance_id', $shipping_zone_instance_id );
+	}
+}
+$shipping_classes = $shipping_zone ? $shipping_zone->get_zone_shipping_classes() : WC()->shipping()->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
 	$settings['class_costs'] = array(
