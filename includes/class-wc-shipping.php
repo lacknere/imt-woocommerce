@@ -230,26 +230,32 @@ class WC_Shipping {
 	 */
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
-			$classes                = get_terms(
-				'product_shipping_class',
+			$classes = get_terms(
 				array(
-					'hide_empty' => '0',
+					'taxonomy'   => 'product_shipping_class',
+					'hide_empty' => 0,
 					'orderby'    => 'name',
 				)
 			);
-			foreach ( $classes as $class ) {
-				$class_max_weight = get_term_meta( $class->term_id, 'max_weight', true );
-				$class->max_weight = empty( $class_max_weight ) ? '—' : $class_max_weight;
-				$class_max_length = get_term_meta( $class->term_id, 'max_length', true );
-				$class->max_length = empty( $class_max_length ) ? '—' : $class_max_length;
-				$class_max_width = get_term_meta( $class->term_id, 'max_width', true );
-				$class->max_width = empty( $class_max_width ) ? '—' : $class_max_width;
-				$class_max_height = get_term_meta( $class->term_id, 'max_height', true );
-				$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
-				$class_has_single_dimension = get_term_meta( $class->term_id, 'has_single_dimension', true );
-				$class->has_single_dimension = empty( $class_has_single_dimension ) ? false : true;
+
+			if ( ! is_wp_error( $classes ) ) {
+				foreach ( $classes as $class ) {
+					$class_max_weight = get_term_meta( $class->term_id, 'max_weight', true );
+					$class->max_weight = empty( $class_max_weight ) ? '—' : $class_max_weight;
+					$class_max_length = get_term_meta( $class->term_id, 'max_length', true );
+					$class->max_length = empty( $class_max_length ) ? '—' : $class_max_length;
+					$class_max_width = get_term_meta( $class->term_id, 'max_width', true );
+					$class->max_width = empty( $class_max_width ) ? '—' : $class_max_width;
+					$class_max_height = get_term_meta( $class->term_id, 'max_height', true );
+					$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
+					$class_has_single_dimension = get_term_meta( $class->term_id, 'has_single_dimension', true );
+					$class->has_single_dimension = empty( $class_has_single_dimension ) ? false : true;
+				}
+
+				$this->shipping_classes = $classes;
+			} else {
+				$this->shipping_classes = array();
 			}
-			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
 		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
 	}

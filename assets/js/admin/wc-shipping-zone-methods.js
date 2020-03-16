@@ -30,8 +30,8 @@
 						changes.zone_postcodes = changedRows.zone_postcodes;
 					}
 
-					if ( typeof changedRows.zone_shipping_classes !== 'undefined' ) {
-						changes.zone_shipping_classes = changedRows.zone_shipping_classes;
+					if ( typeof changedRows.zone_shipping_class_ids !== 'undefined' ) {
+						changes.zone_shipping_class_ids = changedRows.zone_shipping_class_ids;
 					}
 
 					this.changes = changes;
@@ -87,7 +87,7 @@
 
 					$( document.body ).on(
 						'input change',
-						'#zone_name, #zone_locations, #zone_postcodes, #zone_shipping_classes',
+						'#zone_name, #zone_locations, #zone_postcodes, #zone_shipping_class_ids',
 						{ view: this },
 						this.onUpdateZone
 					);
@@ -146,11 +146,12 @@
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
 							if ( 'yes' === rowData.enabled ) {
-								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">'
-									+ data.strings.yes + '</span>';
+								rowData.enabled_icon =
+								'<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' +
+								data.strings.yes + '</span>';
 							} else {
-								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">'
-									+ data.strings.no + '</span>';
+								rowData.enabled_icon = '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' +
+								data.strings.no + '</span>';
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -305,8 +306,8 @@
 						shippingMethodView.block();
 
 						// Save method settings via ajax call
-						$.post( ajaxurl+ ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' )
-							+ 'action=woocommerce_shipping_zone_methods_save_settings', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) +
+						'action=woocommerce_shipping_zone_methods_save_settings', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							instance_id             : posted_data.instance_id,
 							data                    : posted_data

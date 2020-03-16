@@ -73,16 +73,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr valign="top" class="">
 			<th scope="row" class="titledesc">
-				<label for="zone_shipping_classes">
+				<label for="zone_shipping_class_ids">
 					<?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?>
 					<?php echo wc_help_tip( __( 'These are the available shipping classes in this region.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 				</label>
 			</th>
 			<td class="forminp">
-				<select multiple="multiple" data-attribute="zone_shipping_classes" id="zone_shipping_classes" name="zone_shipping_classes" data-placeholder="<?php esc_attr_e( 'Select available shipping classes within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-shipping-class-select chosen_select">
+				<select multiple="multiple" data-attribute="zone_shipping_class_ids" id="zone_shipping_class_ids" name="zone_shipping_class_ids" data-placeholder="<?php esc_attr_e( 'Select available shipping classes within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-shipping-class-select chosen_select">
 					<?php
 					foreach ( $shipping_classes as $shipping_class ) {
-						echo '<option value="' . esc_attr( $shipping_class->term_id ) . '"' . wc_selected( "$shipping_class->term_id", $zone_shipping_classes ) . '>' . esc_html( $shipping_class->name ) . '</option>';
+						echo '<option value="' . esc_attr( $shipping_class->term_id ) . '"' . wc_selected( "$shipping_class->term_id", $zone_shipping_class_ids ) . '>' . esc_html( $shipping_class->name ) . '</option>';
 					}
 					?>
 				</select>

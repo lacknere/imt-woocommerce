@@ -42,6 +42,16 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	);
 
 	/**
+	 * Zone meta data.
+	 *
+	 * @since 4.0.0
+	 * @var array
+	 */
+	protected $meta_data = array(
+		'zone_shipping_class_ids' => array(),
+	);
+
+	/**
 	 * Constructor for zones.
 	 *
 	 * @param int|object $zone Zone ID to load from the DB or zone object.
@@ -150,21 +160,32 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	}
 
 	/**
+	 * Get zone shipping shipping class IDs.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return array of zone shipping class IDs
+	 */
+	public function get_zone_shipping_class_ids( $context = 'view' ) {
+		return $this->get_meta( 'zone_shipping_class_ids', true, $context );
+	}
+
+	/**
 	 * Get zone shipping classes.
 	 *
 	 * @return array of zone shipping classes
 	 */
 	public function get_zone_shipping_classes() {
-		$shipping_classes = WC()->shipping()->get_shipping_classes();
-		$zone_shipping_class_ids_meta = $this->get_meta( 'zone_shipping_classes' );
-		$zone_shipping_class_ids = is_array( $zone_shipping_class_ids_meta ) ? $zone_shipping_class_ids_meta : array();
-		$zone_shipping_classes = array_filter(
-			$shipping_classes,
-			function( $shipping_class ) use ( $zone_shipping_class_ids ) {
-				return in_array( $shipping_class->term_id, $zone_shipping_class_ids );
-			}
+		$zone_shipping_class_ids = $this->get_zone_shipping_class_ids( 'edit' );
+
+		$zone_shipping_classes = get_terms(
+			array(
+				'taxonomy'   => 'product_shipping_class',
+				'hide_empty' => 0,
+				'include'    => $zone_shipping_class_ids,
+			)
 		);
-		return $zone_shipping_classes;
+
+		return ! is_wp_error( $zone_shipping_classes ) ? $zone_shipping_classes : array();
 	}
 
 	/**
@@ -263,13 +284,13 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	}
 
 	/**
-	 * Set zone shipping classes.
+	 * Set zone shipping class ids.
 	 *
 	 * @since 4.0.0
-	 * @param array $shipping_classes Value to set.
+	 * @param array $shipping_class_ids Value to set.
 	 */
-	public function set_zone_shipping_classes( $shipping_classes ) {
-		$this->update_meta_data( 'zone_shipping_classes', $shipping_classes );
+	public function set_zone_shipping_class_ids( $shipping_class_ids ) {
+		$this->update_meta_data( 'zone_shipping_class_ids', $shipping_class_ids );
 	}
 
 	/**

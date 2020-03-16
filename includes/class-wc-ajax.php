@@ -2793,9 +2793,9 @@ class WC_AJAX {
 			}
 		}
 
-		if ( isset( $changes['zone_shipping_classes'] ) ) {
-			$shipping_classes = array_map( 'wc_clean', $changes['zone_shipping_classes'] );
-			$zone->set_zone_shipping_classes( $shipping_classes );
+		if ( isset( $changes['zone_shipping_class_ids'] ) ) {
+			$shipping_class_ids = array_map( 'intval', $changes['zone_shipping_class_ids'] );
+			$zone->set_zone_shipping_class_ids( $shipping_class_ids );
 		}
 
 		if ( isset( $changes['methods'] ) ) {

@@ -259,12 +259,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		$shipping_classes = WC()->shipping()->get_shipping_classes();
-		$zone_shipping_classes = array_map(
-			function( $shipping_class ) {
-				return $shipping_class->term_id;
-			},
-			$zone->get_zone_shipping_classes()
-		);
+		$zone_shipping_class_ids = $zone->get_zone_shipping_class_ids( 'edit' );
 
 		wp_localize_script(
 			'wc-shipping-zone-methods',
