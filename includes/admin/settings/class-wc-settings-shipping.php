@@ -380,6 +380,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'wc-shipping-class-description'    => __( 'Description', 'woocommerce' ),
 				'wc-shipping-class-max-weight'     => __( 'Max weight', 'woocommerce' ),
 				'wc-shipping-class-max-dimensions' => __( 'Max dimensions', 'woocommerce' ),
+				'wc-shipping-class-has-insurance'  => __( 'Insurance', 'woocommerce' ),
 				'wc-shipping-class-count'          => __( 'Product count', 'woocommerce' ),
 			)
 		);

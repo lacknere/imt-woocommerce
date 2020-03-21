@@ -91,6 +91,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</div>
 					<?php
 					break;
+				case 'wc-shipping-class-has-insurance':
+					?>
+					<div class="view">{{ data.has_insurance ? '✔' : '✘' }}</div>
+					<div class="edit"><input type="checkbox" name="has_insurance[{{ data.term_id }}]" data-attribute="has_insurance" value="{{ data.has_insurance }}" {{ data.has_insurance ? 'checked' : '' }} /></div>
+					<?php
+					break;
 				case 'wc-shipping-class-count':
 					?>
 					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&product_shipping_class=' ) ); ?>{{data.slug}}">{{ data.count }}</a>

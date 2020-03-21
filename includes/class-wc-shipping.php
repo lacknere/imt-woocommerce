@@ -250,6 +250,8 @@ class WC_Shipping {
 					$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
 					$class_has_single_dimension = get_term_meta( $class->term_id, 'has_single_dimension', true );
 					$class->has_single_dimension = empty( $class_has_single_dimension ) ? false : true;
+					$class_has_insurance = get_term_meta( $class->term_id, 'has_insurance', true );
+					$class->has_insurance = empty( $class_has_insurance ) ? false : true;
 				}
 
 				$this->shipping_classes = $classes;

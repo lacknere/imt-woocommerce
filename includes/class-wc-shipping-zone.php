@@ -185,7 +185,27 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			)
 		);
 
-		return ! is_wp_error( $zone_shipping_classes ) ? $zone_shipping_classes : array();
+		if ( ! is_wp_error( $zone_shipping_classes ) ) {
+			foreach ( $zone_shipping_classes as $class ) {
+				$class_max_weight = get_term_meta( $class->term_id, 'max_weight', true );
+				$class->max_weight = empty( $class_max_weight ) ? '—' : $class_max_weight;
+				$class_max_length = get_term_meta( $class->term_id, 'max_length', true );
+				$class->max_length = empty( $class_max_length ) ? '—' : $class_max_length;
+				$class_max_width = get_term_meta( $class->term_id, 'max_width', true );
+				$class->max_width = empty( $class_max_width ) ? '—' : $class_max_width;
+				$class_max_height = get_term_meta( $class->term_id, 'max_height', true );
+				$class->max_height = empty( $class_max_height ) ? '—' : $class_max_height;
+				$class_has_single_dimension = get_term_meta( $class->term_id, 'has_single_dimension', true );
+				$class->has_single_dimension = empty( $class_has_single_dimension ) ? false : true;
+				$class->max_single_dimension = $class_has_single_dimension ? $class_max_length : (string) ( floatval( $class_max_length ) + floatval( $class_max_width ) + floatval( $class_max_height ) );
+				$class_has_insurance = get_term_meta( $class->term_id, 'has_insurance', true );
+				$class->has_insurance = empty( $class_has_insurance ) ? false : true;
+			}
+		} else {
+			$zone_shipping_classes = array();
+		}
+
+		return $zone_shipping_classes;
 	}
 
 	/**

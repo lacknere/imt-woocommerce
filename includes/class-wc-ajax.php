@@ -2916,6 +2916,7 @@ class WC_AJAX {
 				delete_term_meta( $term_id, 'max_width' );
 				delete_term_meta( $term_id, 'max_height' );
 				delete_term_meta( $term_id, 'has_single_dimension' );
+				delete_term_meta( $term_id, 'has_insurance' );
 				wp_delete_term( $term_id, 'product_shipping_class' );
 				continue;
 			}
@@ -2954,6 +2955,10 @@ class WC_AJAX {
 				$update_args['has_single_dimension'] = wc_clean( $data['has_single_dimension'] );
 			}
 
+			if ( isset( $data['has_insurance'] ) ) {
+				$update_args['has_insurance'] = wc_clean( $data['has_insurance'] );
+			}
+
 			if ( isset( $data['newRow'] ) ) {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
@@ -2966,6 +2971,7 @@ class WC_AJAX {
 				add_term_meta( $term_id, 'max_width', $update_args['max_width'] );
 				add_term_meta( $term_id, 'max_height', $update_args['max_height'] );
 				add_term_meta( $term_id, 'has_single_dimension', $update_args['has_single_dimension'] );
+				add_term_meta( $term_id, 'has_insurance', $update_args['has_insurance'] );
 			} else {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 				if ( isset( $update_args['max_weight'] ) ) {
@@ -2987,16 +2993,30 @@ class WC_AJAX {
 				if ( isset( $update_args['has_single_dimension'] ) ) {
 					update_term_meta( $term_id, 'has_single_dimension', $update_args['has_single_dimension'] );
 				}
+
+				if ( isset( $update_args['has_insurance'] ) ) {
+					update_term_meta( $term_id, 'has_insurance', $update_args['has_insurance'] );
+				}
 			}
 
 			do_action( 'woocommerce_shipping_classes_save_class', $term_id, $data );
+		}
+
+		$products = wc_get_products(
+			array(
+				'return'  => 'objects',
+			)
+		);
+
+		foreach ( $products as $product ) {
+			$product->maybe_update_automatic_shipping_class_selection();
 		}
 
 		$wc_shipping = WC_Shipping::instance();
 
 		wp_send_json_success(
 			array(
-				'shipping_classes' => $wc_shipping->get_shipping_classes(),
+				'shipping_classes' => $wc_shipping->get_shipping_classes( true ),
 			)
 		);
 	}

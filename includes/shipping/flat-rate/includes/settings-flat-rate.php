@@ -42,7 +42,7 @@ $shipping_zone = WC_Shipping_Zones::get_zone_by( 'current' );
 if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['wc_shipping_zones_nonce'] ) && isset( $_POST['instance_id'] ) ) {
 	$shipping_zone_nonce = wc_clean( wp_unslash( $_POST['wc_shipping_zones_nonce'] ) );
 	$shipping_zone_instance_id = wc_clean( wp_unslash( $_POST['instance_id'] ) );
-	if ( wp_verify_nonce( $shipping_zone_nonce ) ) {
+	if ( wp_verify_nonce( $shipping_zone_nonce, 'wc_shipping_zones_nonce' ) ) {
 		$shipping_zone = WC_Shipping_Zones::get_zone_by( 'instance_id', $shipping_zone_instance_id );
 	}
 }
@@ -68,6 +68,17 @@ if ( ! empty( $shipping_classes ) ) {
 			'description'       => $cost_desc,
 			'default'           => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
 			'desc_tip'          => true,
+			'sanitize_callback' => array( $this, 'sanitize_cost' ),
+		);
+		if ( ! $shipping_class->has_insurance ) {
+			continue;
+		}
+		$settings[ 'class_insurance_cost_' . $shipping_class->term_id ] = array(
+			/* translators: %s: shipping class name */
+			'title'             => sprintf( __( '"%s" shipping class insurance cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
+			'type'              => 'text',
+			'placeholder'       => __( 'N/A', 'woocommerce' ),
+			'default'           => $this->get_option( 'class_insurance_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
 			'sanitize_callback' => array( $this, 'sanitize_cost' ),
 		);
 	}
