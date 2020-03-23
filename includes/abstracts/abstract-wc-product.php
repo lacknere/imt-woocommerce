@@ -80,6 +80,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'length'             => '',
 		'width'              => '',
 		'height'             => '',
+		'automatic_shipping_class_selection' => false,
+		'shipping_class_ids' => array(),
 		'upsell_ids'         => array(),
 		'cross_sell_ids'     => array(),
 		'parent_id'          => 0,
@@ -93,7 +95,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'downloadable'       => false,
 		'category_ids'       => array(),
 		'tag_ids'            => array(),
-		'shipping_class_id'  => 0,
 		'downloads'          => array(),
 		'image_id'           => '',
 		'gallery_image_ids'  => array(),
@@ -464,6 +465,28 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get automatic shipping class selection.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since  4.0.0
+	 * @return boolean
+	 */
+	public function get_automatic_shipping_class_selection( $context = 'view' ) {
+		return $this->get_prop( 'automatic_shipping_class_selection', $context );
+	}
+
+	/**
+	 * Get shipping class IDs with shipping zone ID as key.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since  4.0.0
+	 * @return array
+	 */
+	public function get_shipping_class_ids( $context = 'view' ) {
+		return $this->get_prop( 'shipping_class_ids', $context );
+	}
+
+	/**
 	 * Get upsell IDs.
 	 *
 	 * @since  3.0.0
@@ -602,17 +625,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_gallery_image_ids( $context = 'view' ) {
 		return $this->get_prop( 'gallery_image_ids', $context );
-	}
-
-	/**
-	 * Get shipping class ID.
-	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int
-	 */
-	public function get_shipping_class_id( $context = 'view' ) {
-		return $this->get_prop( 'shipping_class_id', $context );
 	}
 
 	/**
@@ -1040,6 +1052,89 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set if shipping class should be selected automatically.
+	 *
+	 * @since 4.0.0
+	 * @param bool $automatic_shipping_class_selection Whether or not product shipping class should be selected automatically.
+	 */
+	public function set_automatic_shipping_class_selection( $automatic_shipping_class_selection ) {
+		$automatic_shipping_class_selection = wc_string_to_bool( $automatic_shipping_class_selection );
+
+		if ( ! $this->has_weight() || ! $this->has_all_dimensions() ) {
+			$automatic_shipping_class_selection = false;
+		}
+
+		$this->set_prop( 'automatic_shipping_class_selection', $automatic_shipping_class_selection );
+	}
+
+	/**
+	 * Set shipping classes based on weight and dimensions.
+	 *
+	 * @since  4.0.0
+	 * @return bool
+	 */
+	public function maybe_set_shipping_classes_based_on_weight_and_dimensions() {
+		if ( $this->get_automatic_shipping_class_selection( 'edit' ) && $this->has_weight() && $this->has_all_dimensions() ) {
+			$product_weight = floatval( $this->get_weight( 'edit' ) );
+			$product_length = floatval( $this->get_length( 'edit' ) );
+			$product_width = floatval( $this->get_width( 'edit' ) );
+			$product_height = floatval( $this->get_height( 'edit' ) );
+			$product_single_dimension = $product_length + $product_width + $product_height;
+			$shipping_zones = WC_Shipping_Zones::get_zones();
+			$shipping_class_ids = array();
+
+			foreach ( $shipping_zones as $shipping_zone ) {
+				$shipping_zone = new WC_Shipping_Zone( $shipping_zone['zone_id'] );
+				$shipping_zone_shipping_classes = $shipping_zone->get_zone_shipping_classes();
+				$optimal_shipping_class = null;
+
+				foreach ( $shipping_zone_shipping_classes as $shipping_class ) {
+					$max_weight = floatval( $shipping_class->max_weight );
+					$has_single_dimension = $shipping_class->has_single_dimension;
+					$max_length = floatval( $shipping_class->max_length );
+					$max_single_dimension = $max_length;
+					if ( ! $has_single_dimension ) {
+						$max_width = floatval( $shipping_class->max_width );
+						$max_height = floatval( $shipping_class->max_height );
+						$max_single_dimension += $max_width + $max_height;
+					}
+
+					if ( $product_weight > $max_weight || $product_single_dimension > $max_single_dimension ) {
+						continue;
+					}
+					if ( ! $has_single_dimension && ( $product_length > $max_length || $product_width > $max_width || $product_height > $max_height ) ) {
+						continue;
+					}
+					if ( isset( $optimal_shipping_class ) ) {
+						if ( $max_weight <= floatval( $optimal_shipping_class->max_weight ) && $max_single_dimension <= floatval( $optimal_shipping_class->max_single_dimension ) ) {
+							$optimal_shipping_class = $shipping_class;
+						}
+					} else {
+						$optimal_shipping_class = $shipping_class;
+					}
+				}
+
+				$shipping_class_ids[ $shipping_zone->get_id() ] = $optimal_shipping_class->term_id;
+			}
+
+			$this->set_shipping_class_ids( $shipping_class_ids );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set shipping class IDs.
+	 *
+	 * @since 4.0.0
+	 * @param array $shipping_class_ids IDs from shipping classes with shipping zone ID as key.
+	 */
+	public function set_shipping_class_ids( $shipping_class_ids ) {
+		$this->set_prop( 'shipping_class_ids', array_filter( (array) $shipping_class_ids ) );
+	}
+
+	/**
 	 * Set upsell IDs.
 	 *
 	 * @since 3.0.0
@@ -1174,16 +1269,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_virtual( $virtual ) {
 		$this->set_prop( 'virtual', wc_string_to_bool( $virtual ) );
-	}
-
-	/**
-	 * Set shipping class ID.
-	 *
-	 * @since 3.0.0
-	 * @param int $id Product shipping class id.
-	 */
-	public function set_shipping_class_id( $id ) {
-		$this->set_prop( 'shipping_class_id', absint( $id ) );
 	}
 
 	/**
@@ -1393,6 +1478,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $this->get_id();
 	}
 
+	/**
+	 * Maybe update automatic shipping class selection.
+	 *
+	 * @since  4.0.0
+	 * @return int
+	 */
+	public function maybe_update_automatic_shipping_class_selection() {
+		$this->validate_props();
+
+		if ( ! $this->data_store ) {
+			return $this->get_id();
+		}
+
+		if ( $this->get_id() ) {
+			$this->data_store->maybe_update_automatic_shipping_class_selection( $this );
+		}
+
+		return $this->get_id();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Conditionals
@@ -1537,6 +1642,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function has_dimensions() {
 		return ( $this->get_length() || $this->get_height() || $this->get_width() ) && ! $this->get_virtual();
+	}
+
+	/**
+	 * Returns whether or not the product has all dimensions set.
+	 *
+	 * @return bool
+	 */
+	public function has_all_dimensions() {
+		return ( $this->get_length() && $this->get_height() && $this->get_width() ) && ! $this->get_virtual();
 	}
 
 	/**
@@ -1866,18 +1980,51 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns the product shipping class SLUG.
+	 * Returns the product shipping class SLUGS.
 	 *
 	 * @return string
 	 */
-	public function get_shipping_class() {
-		if ( $class_id = $this->get_shipping_class_id() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
-			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
+	public function get_shipping_classes() {
+		$class_ids = $this->get_shipping_class_ids();
+		if ( ! empty( $class_ids ) ) {
+			$terms = get_terms(
+				array(
+					'taxonomy' => 'product_shipping_class',
+					'include' => array_values( $class_ids ),
+				)
+			);
 
-			if ( $term && ! is_wp_error( $term ) ) {
-				return $term->slug;
+			if ( $terms && ! is_wp_error( $terms ) ) {
+				return implode(
+					',',
+					array_map(
+						function( $term ) {
+							return $term->slug;
+						},
+						$terms
+					)
+				);
 			}
 		}
+		return '';
+	}
+
+	/**
+	 * Returns the product shipping class SLUG for shipping zone.
+	 *
+	 * @param  string $shipping_zone_id shipping zone identifier.
+	 * @return string
+	 */
+	public function get_shipping_class_by_shipping_zone_id( $shipping_zone_id ) {
+		$shipping_class_ids = $this->get_shipping_class_ids();
+
+		if ( array_key_exists( $shipping_zone_id, $shipping_class_ids ) ) {
+			$shipping_class_id = $shipping_class_ids[ $shipping_zone_id ];
+			$shipping_class = get_term_by( 'id', $shipping_class_id, 'product_shipping_class' );
+
+			return ! is_wp_error( $shipping_class ) ? $shipping_class->slug : '';
+		}
+
 		return '';
 	}
 
@@ -1963,7 +2110,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
-		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, WordPress.CodeAnalysis.AssignmentInCondition.Found
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}

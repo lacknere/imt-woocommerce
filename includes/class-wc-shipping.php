@@ -226,10 +226,11 @@ class WC_Shipping {
 	/**
 	 * Get an array of shipping classes.
 	 *
+	 * @param bool $force Force shipping classes renewal.
 	 * @return array
 	 */
-	public function get_shipping_classes() {
-		if ( empty( $this->shipping_classes ) ) {
+	public function get_shipping_classes( $force = false ) {
+		if ( empty( $this->shipping_classes ) || $force ) {
 			$classes = get_terms(
 				array(
 					'taxonomy'   => 'product_shipping_class',

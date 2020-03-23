@@ -476,7 +476,8 @@ jQuery( function( $ ) {
 
 				$( '.product_attributes .woocommerce_attribute' ).each( function( index, el ) {
 					if ( $( el ).css( 'display' ) !== 'none' && $( el ).is( '.taxonomy' ) ) {
-						$( 'select.attribute_taxonomy' ).find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' ).prop( 'disabled', true );
+						$( 'select.attribute_taxonomy' ).find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' )
+							.prop( 'disabled', true );
 					}
 				});
 
@@ -677,4 +678,27 @@ jQuery( function( $ ) {
 
 		return false;
 	});
+
+	// Shipping
+	function toggleAutomaticShippingClassSelection() {
+		var weight_and_dimensions_set = $( '#_weight' ).val() && $( '#product_length' ).val() &&
+			$( '#product_width' ).val() && $( '#product_height' ).val();
+
+		$( '#_automatic_shipping_class_selection' ).prop( 'disabled', ! weight_and_dimensions_set );
+
+		if ( ! weight_and_dimensions_set ) {
+			$( '#_automatic_shipping_class_selection' ).prop( 'checked', false );
+			toggleShippingClasses();
+		}
+	}
+
+	function toggleShippingClasses() {
+		$( '.shipping_class_id' ).prop( 'disabled', $( '#_automatic_shipping_class_selection' ).prop( 'checked' ) );
+	}
+
+	$( '#_weight, #product_length, #product_width, #product_height' ).on( 'change', toggleAutomaticShippingClassSelection );
+	toggleAutomaticShippingClassSelection();
+
+	$( '#_automatic_shipping_class_selection' ).on( 'change', toggleShippingClasses );
+	toggleShippingClasses();
 });

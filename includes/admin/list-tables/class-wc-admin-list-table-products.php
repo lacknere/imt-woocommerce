@@ -186,7 +186,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="length">' . esc_html( $this->object->get_length() ) . '</div>
 				<div class="width">' . esc_html( $this->object->get_width() ) . '</div>
 				<div class="height">' . esc_html( $this->object->get_height() ) . '</div>
-				<div class="shipping_class">' . esc_html( $this->object->get_shipping_class() ) . '</div>
+				<div class="shipping_classes">' . esc_html( $this->object->get_shipping_classes() ) . '</div>
 				<div class="visibility">' . esc_html( $this->object->get_catalog_visibility() ) . '</div>
 				<div class="stock_status">' . esc_html( $this->object->get_stock_status() ) . '</div>
 				<div class="stock">' . esc_html( $this->object->get_stock_quantity() ) . '</div>

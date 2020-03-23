@@ -45,6 +45,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_length',
 		'_width',
 		'_height',
+		'_automatic_shipping_class_selection',
+		'_shipping_class_ids',
 		'_upsell_ids',
 		'_crosssell_ids',
 		'_purchase_note',
@@ -135,6 +137,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+			$product->maybe_set_shipping_classes_based_on_weight_and_dimensions();
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
@@ -197,6 +200,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product object.
 	 */
 	public function update( &$product ) {
+		$product->maybe_set_shipping_classes_based_on_weight_and_dimensions();
 		$product->save_meta_data();
 		$changes = $product->get_changes();
 
@@ -270,6 +274,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Method to update automatic shipping class selection of a product.
+	 *
+	 * @param WC_Product $product Product object.
+	 */
+	public function maybe_update_automatic_shipping_class_selection( &$product ) {
+		if ( $product->maybe_set_shipping_classes_based_on_weight_and_dimensions() ) {
+			$product->save_meta_data();
+			clean_post_cache( $product->get_id() );
+			$product->read_meta_data( true );
+			$this->update_post_meta( $product );
+			$this->update_terms( $product );
+			$this->clear_caches( $product );
+			$product->apply_changes();
+		}
+	}
+
+	/**
 	 * Method to delete a product from the database.
 	 *
 	 * @param WC_Product $product Product object.
@@ -335,6 +356,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_length'                => 'length',
 			'_width'                 => 'width',
 			'_height'                => 'height',
+			'_automatic_shipping_class_selection' => 'automatic_shipping_class_selection',
+			'_shipping_class_ids'    => 'shipping_class_ids',
 			'_upsell_ids'            => 'upsell_ids',
 			'_crosssell_ids'         => 'cross_sell_ids',
 			'_purchase_note'         => 'purchase_note',
@@ -361,7 +384,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
-		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
 
 		$product->set_props( $set_props );
@@ -525,6 +547,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_length'                => 'length',
 			'_width'                 => 'width',
 			'_height'                => 'height',
+			'_automatic_shipping_class_selection' => 'automatic_shipping_class_selection',
+			'_shipping_class_ids'    => 'shipping_class_ids',
 			'_upsell_ids'            => 'upsell_ids',
 			'_crosssell_ids'         => 'cross_sell_ids',
 			'_purchase_note'         => 'purchase_note',
@@ -559,6 +583,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'downloadable':
 				case 'manage_stock':
 				case 'sold_individually':
+					$value = wc_bool_to_string( $value );
+					break;
+				case 'automatic_shipping_class_selection':
 					$value = wc_bool_to_string( $value );
 					break;
 				case 'gallery_image_ids':
@@ -679,8 +706,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
-		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		if ( $force || array_key_exists( 'shipping_class_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), array_values( $product->get_shipping_class_ids( 'edit' ) ), 'product_shipping_class', false );
 		}
 	}
 

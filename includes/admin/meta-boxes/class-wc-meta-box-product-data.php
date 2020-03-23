@@ -349,7 +349,7 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_from = wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) );
 
 			if ( ! empty( $date_on_sale_from ) ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+				$date_on_sale_from = gmdate( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
 			}
 		}
 
@@ -358,9 +358,18 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_to = wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) );
 
 			if ( ! empty( $date_on_sale_to ) ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+				$date_on_sale_to = gmdate( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
 			}
 		}
+
+		// Clean shipping class IDs.
+		$shipping_class_ids = isset( $_POST['shipping_class_ids'] ) ? (array) wp_unslash( $_POST['shipping_class_ids'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		array_walk(
+			$shipping_class_ids,
+			function( $shipping_class_id ) {
+				$shipping_class_id = intval( $shipping_class_id );
+			}
+		);
 
 		$errors = $product->set_props(
 			array(
@@ -376,7 +385,8 @@ class WC_Meta_Box_Product_Data {
 				'length'             => isset( $_POST['_length'] ) ? wc_clean( wp_unslash( $_POST['_length'] ) ) : null,
 				'width'              => isset( $_POST['_width'] ) ? wc_clean( wp_unslash( $_POST['_width'] ) ) : null,
 				'height'             => isset( $_POST['_height'] ) ? wc_clean( wp_unslash( $_POST['_height'] ) ) : null,
-				'shipping_class_id'  => isset( $_POST['product_shipping_class'] ) ? absint( wp_unslash( $_POST['product_shipping_class'] ) ) : null,
+				'automatic_shipping_class_selection'  => ! empty( $_POST['_automatic_shipping_class_selection'] ),
+				'shipping_class_ids' => $shipping_class_ids,
 				'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
 				'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['upsell_ids'] ) ) : array(),
 				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['crosssell_ids'] ) ) : array(),
@@ -475,7 +485,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_from = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_from'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_from ) ) {
-						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+						$date_on_sale_from = gmdate( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
 					}
 				}
 
@@ -484,7 +494,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_to = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_to'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_to ) ) {
-						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+						$date_on_sale_to = gmdate( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
 					}
 				}
 
