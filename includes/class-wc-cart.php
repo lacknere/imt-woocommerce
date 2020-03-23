@@ -1351,6 +1351,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
+					'shipping_insurance' => WC()->session->get( 'shipping_insurance' ),
 				),
 			)
 		);

@@ -27,6 +27,7 @@ class WC_Shipping_Rate {
 		'instance_id' => 0,
 		'label'       => '',
 		'cost'        => 0,
+		'insurance'   => false,
 		'taxes'       => array(),
 	);
 
@@ -41,17 +42,19 @@ class WC_Shipping_Rate {
 	/**
 	 * Constructor.
 	 *
-	 * @param string  $id          Shipping rate ID.
-	 * @param string  $label       Shipping rate label.
-	 * @param integer $cost        Cost.
-	 * @param array   $taxes       Taxes applied to shipping rate.
-	 * @param string  $method_id   Shipping method ID.
-	 * @param int     $instance_id Shipping instance ID.
+	 * @param string     $id          Shipping rate ID.
+	 * @param string     $label       Shipping rate label.
+	 * @param integer    $cost        Cost.
+	 * @param float|bool $insurance   Insurance, 'false' if not available.
+	 * @param array      $taxes       Taxes applied to shipping rate.
+	 * @param string     $method_id   Shipping method ID.
+	 * @param int        $instance_id Shipping instance ID.
 	 */
-	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0 ) {
+	public function __construct( $id = '', $label = '', $cost = 0, $insurance = false, $taxes = array(), $method_id = '', $instance_id = 0 ) {
 		$this->set_id( $id );
 		$this->set_label( $label );
 		$this->set_cost( $cost );
+		$this->set_insurance( $insurance );
 		$this->set_taxes( $taxes );
 		$this->set_method_id( $method_id );
 		$this->set_instance_id( $instance_id );
@@ -152,6 +155,16 @@ class WC_Shipping_Rate {
 	}
 
 	/**
+	 * Set rate insurance.
+	 *
+	 * @since 4.0.0
+	 * @param string|bool $insurance Shipping rate insurance.
+	 */
+	public function set_insurance( $insurance ) {
+		$this->data['insurance'] = $insurance;
+	}
+
+	/**
 	 * Set rate taxes.
 	 *
 	 * @since 3.2.0
@@ -208,6 +221,16 @@ class WC_Shipping_Rate {
 	 */
 	public function get_cost() {
 		return apply_filters( 'woocommerce_shipping_rate_cost', $this->data['cost'], $this );
+	}
+
+	/**
+	 * Get rate insurance.
+	 *
+	 * @since 4.0.0
+	 * @return string|bool
+	 */
+	public function get_insurance() {
+		return apply_filters( 'woocommerce_shipping_rate_insurance_cost', $this->data['insurance'], $this );
 	}
 
 	/**

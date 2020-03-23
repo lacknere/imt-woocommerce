@@ -538,6 +538,7 @@ class WC_Frontend_Scripts {
 					'ajax_url'                     => WC()->ajax_url(),
 					'wc_ajax_url'                  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'update_shipping_method_nonce' => wp_create_nonce( 'update-shipping-method' ),
+					'update_shipping_insurance_nonce' => wp_create_nonce( 'update-shipping-insurance' ),
 					'apply_coupon_nonce'           => wp_create_nonce( 'apply-coupon' ),
 					'remove_coupon_nonce'          => wp_create_nonce( 'remove-coupon' ),
 				);

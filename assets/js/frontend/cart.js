@@ -134,6 +134,7 @@ jQuery( function( $ ) {
 	 */
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
+			// eslint-disable-next-line max-len
 			$target = $( '.woocommerce-notices-wrapper:first' ) || $( '.cart-empty' ).closest( '.woocommerce' ) || $( '.woocommerce-cart-form' );
 		}
 		$target.prepend( html_element );
@@ -165,6 +166,11 @@ jQuery( function( $ ) {
 				this.shipping_method_selected
 			);
 			$( document ).on(
+				'change',
+				':input[name^=shipping_insurance]',
+				this.shipping_insurance_checked
+			);
+			$( document ).on(
 				'submit',
 				'form.woocommerce-shipping-calculator',
 				this.shipping_calculator_submit
@@ -188,6 +194,7 @@ jQuery( function( $ ) {
 		shipping_method_selected: function() {
 			var shipping_methods = {};
 
+			// eslint-disable-next-line max-len
 			$( 'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]' ).each( function() {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
@@ -210,6 +217,34 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $( 'div.cart_totals' ) );
 					$( document.body ).trigger( 'updated_shipping_method' );
+				}
+			} );
+		},
+
+		/**
+		 * Handles when shipping insurance is checked.
+		 */
+		shipping_insurance_checked: function() {
+			var shipping_insurance = this.checked;
+
+			block( $( 'div.cart_totals' ) );
+
+			var data = {
+				security: wc_cart_params.update_shipping_insurance_nonce,
+				shipping_insurance: shipping_insurance
+			};
+
+			$.ajax( {
+				type:     'post',
+				url:      get_url( 'update_shipping_insurance' ),
+				data:     data,
+				dataType: 'html',
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
+					$( document.body ).trigger( 'updated_shipping_insurance' );
 				}
 			} );
 		},

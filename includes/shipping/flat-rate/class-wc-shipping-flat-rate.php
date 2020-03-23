@@ -143,6 +143,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'id'      => $this->get_rate_id(),
 			'label'   => $this->title,
 			'cost'    => 0,
+			'insurance' => false,
 			'package' => $package,
 		);
 
@@ -162,16 +163,27 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Add shipping class costs.
-		$shipping_classes = WC()->shipping()->get_shipping_classes();
+		$shipping_zone = WC_Shipping_Zones::get_zone_matching_package( $package );
+		$shipping_classes = $shipping_zone->get_zone_shipping_classes();
 
 		if ( ! empty( $shipping_classes ) ) {
-			$found_shipping_classes = $this->find_shipping_classes( $package );
+			$found_shipping_classes = $this->find_shipping_classes( $package, $shipping_zone->get_id() );
 			$highest_class_cost     = 0;
+			$highest_class_insurance_cost = false;
 
 			foreach ( $found_shipping_classes as $shipping_class => $products ) {
 				// Also handles BW compatibility when slugs were used instead of ids.
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+
+				$class_has_insurance = $shipping_class_term && $shipping_class_term->term_id && ! empty( get_term_meta( $shipping_class_term->term_id, 'has_insurance', true ) ) ? true : false;
+				$class_insurance_cost = $class_has_insurance ? $this->evaluate_cost(
+					$this->get_option( 'class_insurance_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_insurance_cost_' . $shipping_class, '0.00' ) ),
+					array(
+						'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+						'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+					)
+				) : false;
 
 				if ( '' === $class_cost_string ) {
 					continue;
@@ -188,13 +200,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				if ( 'class' === $this->type ) {
 					$rate['cost'] += $class_cost;
-				} else {
-					$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
+				} elseif ( $class_cost > $highest_class_cost ) {
+					$highest_class_cost = $class_cost;
+					$highest_class_insurance_cost = is_bool( $class_insurance_cost ) ? $class_insurance_cost : floatval( $class_insurance_cost );
 				}
 			}
 
 			if ( 'order' === $this->type && $highest_class_cost ) {
 				$rate['cost'] += $highest_class_cost;
+				$rate['insurance'] = $highest_class_insurance_cost;
 			}
 		}
 
@@ -231,14 +245,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Finds and returns shipping classes and the products with said class.
 	 *
 	 * @param mixed $package Package of items from cart.
+	 * @param int   $shipping_zone_id Shipping zone identifier.
 	 * @return array
 	 */
-	public function find_shipping_classes( $package ) {
+	public function find_shipping_classes( $package, $shipping_zone_id ) {
 		$found_shipping_classes = array();
 
 		foreach ( $package['contents'] as $item_id => $values ) {
 			if ( $values['data']->needs_shipping() ) {
-				$found_class = $values['data']->get_shipping_class();
+				$found_class = $values['data']->get_shipping_class_by_shipping_zone_id( $shipping_zone_id );
 
 				if ( ! isset( $found_shipping_classes[ $found_class ] ) ) {
 					$found_shipping_classes[ $found_class ] = array();

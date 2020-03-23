@@ -101,6 +101,7 @@ class WC_AJAX {
 			'apply_coupon',
 			'remove_coupon',
 			'update_shipping_method',
+			'update_shipping_insurance',
 			'get_cart_totals',
 			'update_order_review',
 			'add_to_cart',
@@ -259,6 +260,21 @@ class WC_AJAX {
 	}
 
 	/**
+	 * AJAX update shipping insurance on cart page.
+	 */
+	public static function update_shipping_insurance() {
+		check_ajax_referer( 'update-shipping-insurance', 'security' );
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
+
+		$posted_shipping_insurance = isset( $_POST['shipping_insurance'] ) ? wc_string_to_bool( wc_clean( wp_unslash( $_POST['shipping_insurance'] ) ) ) : false;
+
+		WC()->session->set( 'shipping_insurance', $posted_shipping_insurance );
+
+		self::get_cart_totals();
+	}
+
+	/**
 	 * AJAX receive updated cart_totals div.
 	 */
 	public static function get_cart_totals() {
@@ -308,6 +324,10 @@ class WC_AJAX {
 		}
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+		if ( isset( $_POST['shipping_insurance'] ) ) {
+			$posted_shipping_insurance = wc_string_to_bool( wc_clean( wp_unslash( $_POST['shipping_insurance'] ) ) );
+			WC()->session->set( 'shipping_insurance', $posted_shipping_insurance );
+		}
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : wc_clean( wp_unslash( $_POST['payment_method'] ) ) );
 		WC()->customer->set_props(
 			array(

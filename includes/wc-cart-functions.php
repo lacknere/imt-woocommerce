@@ -210,6 +210,11 @@ function wc_cart_totals_shipping_html() {
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+		$free_shipping_insurance = ! empty( $chosen_method ) && is_numeric( $package['rates'][ $chosen_method ]->insurance ) && 0 == $package['rates'][ $chosen_method ]->insurance ? true : false;
+		if ( $free_shipping_insurance ) {
+			WC()->session->set( 'shipping_insurance', true );
+		}
+		$shipping_insurance = WC()->session->get( 'shipping_insurance' );
 		$product_names = array();
 
 		if ( count( $packages ) > 1 ) {
@@ -231,6 +236,8 @@ function wc_cart_totals_shipping_html() {
 				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
+				'free_shipping_insurance'  => $free_shipping_insurance,
+				'shipping_insurance'       => $shipping_insurance,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
 				'has_calculated_shipping'  => WC()->customer->has_calculated_shipping(),
 			)
@@ -363,6 +370,18 @@ function wc_cart_totals_shipping_method_label( $method ) {
 	}
 
 	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
+}
+
+/**
+ * Get a shipping insurance full label including price.
+ *
+ * @param  WC_Shipping_Rate $method Shipping method rate data.
+ * @return string
+ */
+function wc_cart_totals_shipping_insurance_label( $method ) {
+	$label = is_numeric( $method->insurance ) ? __( 'Insurance', 'woocommerce' ) . ' (' . wc_price( $method->insurance ) . ')' : __( 'No insurance available', 'woocommerce' );
+
+	return apply_filters( 'woocommerce_cart_shipping_insurance_full_label', $label, $method );
 }
 
 /**

@@ -41,6 +41,14 @@ $calculator_text          = '';
 						do_action( 'woocommerce_after_shipping_rate', $method, $index );
 						?>
 					</li>
+					<?php if ( is_numeric( $method->insurance ) ) : ?>
+						<li style="display: <?php echo $method->id === $chosen_method ? 'block' : 'none'; ?>">
+							<?php
+							printf( '<input type="checkbox" name="shipping_insurance[%1$d]" data-index="%1$d" id="shipping_insurance_%1$d_%2$s" class="shipping_insurance" %3$s %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), checked( $shipping_insurance, true, false ), disabled( $free_shipping_insurance, true, false ) ); // WPCS: XSS ok.
+							printf( '<label for="shipping_insurance_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_insurance_label( $method ) ); // WPCS: XSS ok.
+							?>
+						</li>
+					<?php endif; ?>
 				<?php endforeach; ?>
 			</ul>
 			<?php if ( is_cart() ) : ?>

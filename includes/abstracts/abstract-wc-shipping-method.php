@@ -271,6 +271,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					'id'             => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 					'label'          => '', // Label for the rate.
 					'cost'           => '0', // Amount or array of costs (per item shipping).
+					'insurance'      => false, // Shipping insurance, 'false' if not available.
 					'taxes'          => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations.
 					'calc_tax'       => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs.
 					'meta_data'      => array(), // Array of misc meta data to store along with this rate - key value pairs.
@@ -288,6 +289,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Total up the cost.
 		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
+
+		// Add insurance cost if available and checked.
+		$insurance = $args['insurance'];
+		$insurance_checked = WC()->session->get( 'shipping_insurance', false );
+		if ( $insurance && $insurance_checked ) {
+			$total_cost += $insurance;
+		}
+
 		$taxes      = $args['taxes'];
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
@@ -305,6 +314,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$rate->set_instance_id( $this->instance_id );
 		$rate->set_label( $args['label'] );
 		$rate->set_cost( $total_cost );
+		$rate->set_insurance( $insurance );
 		$rate->set_taxes( $taxes );
 
 		if ( ! empty( $args['meta_data'] ) ) {

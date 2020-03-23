@@ -42,6 +42,15 @@ jQuery( function( $ ) {
 
 			// Inputs/selects which update totals
 			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]', this.trigger_update_checkout ); // eslint-disable-line max-len
+			this.$checkout_form.on( 'change', 'input[name^="shipping_insurance"]',
+				function (e) {
+					this.trigger_update_checkout( {
+						update_shipping_method: false,
+						update_shipping_insurance: true,
+						shipping_insurance: e.currentTarget.checked
+					} );
+				}.bind( this )
+			);
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed ); // eslint-disable-line max-len
 			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout ); // eslint-disable-line max-len
@@ -157,10 +166,10 @@ jQuery( function( $ ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.maybe_update_checkout, '1000' );
 		},
-		trigger_update_checkout: function() {
+		trigger_update_checkout: function( args ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.dirtyInput = false;
-			$( document.body ).trigger( 'update_checkout' );
+			$( document.body ).trigger( 'update_checkout', args );
 		},
 		maybe_update_checkout: function() {
 			var update_totals = true;
@@ -254,7 +263,8 @@ jQuery( function( $ ) {
 			}
 
 			args = typeof args !== 'undefined' ? args : {
-				update_shipping_method: true
+				update_shipping_method: true,
+				update_shipping_insurance: false
 			};
 
 			var country			 = $( '#billing_country' ).val(),
@@ -317,6 +327,12 @@ jQuery( function( $ ) {
 				} );
 
 				data.shipping_method = shipping_methods;
+			}
+
+			if ( false !== args.update_shipping_insurance ) {
+				var shipping_insurance = args.shipping_insurance;
+
+				data.shipping_insurance = shipping_insurance;
 			}
 
 			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
@@ -619,7 +635,8 @@ jQuery( function( $ ) {
 						$form.slideUp();
 
 						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
-						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
+						// eslint-disable-next-line max-len
+						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false, update_shipping_insurance: false } );
 					}
 				},
 				dataType: 'html'
@@ -657,7 +674,8 @@ jQuery( function( $ ) {
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );
 
-						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
+						// eslint-disable-next-line max-len
+						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false, update_shipping_insurance: false } );
 
 						// Remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
