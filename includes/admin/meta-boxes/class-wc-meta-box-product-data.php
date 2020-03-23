@@ -362,15 +362,6 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Clean shipping class IDs.
-		$shipping_class_ids = isset( $_POST['shipping_class_ids'] ) ? (array) wp_unslash( $_POST['shipping_class_ids'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		array_walk(
-			$shipping_class_ids,
-			function( $shipping_class_id ) {
-				$shipping_class_id = intval( $shipping_class_id );
-			}
-		);
-
 		$errors = $product->set_props(
 			array(
 				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
@@ -386,7 +377,7 @@ class WC_Meta_Box_Product_Data {
 				'width'              => isset( $_POST['_width'] ) ? wc_clean( wp_unslash( $_POST['_width'] ) ) : null,
 				'height'             => isset( $_POST['_height'] ) ? wc_clean( wp_unslash( $_POST['_height'] ) ) : null,
 				'automatic_shipping_class_selection'  => ! empty( $_POST['_automatic_shipping_class_selection'] ),
-				'shipping_class_ids' => $shipping_class_ids,
+				'shipping_class_ids' => isset( $_POST['shipping_class_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['shipping_class_ids'] ) ) : array(),
 				'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
 				'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['upsell_ids'] ) ) : array(),
 				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['crosssell_ids'] ) ) : array(),
